@@ -1,0 +1,14 @@
+[build]
+  command = "bun run build"
+  publish = "dist/client"
+
+[build.environment]
+  NITRO_PRESET = "netlify"
+  # Set VITE_API_URL in the Netlify UI (Site settings → Environment variables).
+  # It is baked into the client bundle at build time.
+
+# SPA fallback for client-side routes.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
