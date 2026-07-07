@@ -6,7 +6,7 @@ import type { ApiErrorBody } from "@/types/api";
  * Example: VITE_API_URL=https://api.your-domain.com
  */
 export const API_BASE_URL: string = (
-  import.meta.env.VITE_API_URL ?? "http://localhost:8000"
+  import.meta.env.VITE_API_URL ?? ""
 ).replace(/\/$/, "");
 
 export class ApiError extends Error {
@@ -68,6 +68,10 @@ export async function apiFetch<T>(
     signal,
     ...rest
   } = opts;
+
+  if (!API_BASE_URL) {
+    throw new ApiError("VITE_API_URL is not configured", 0);
+  }
 
   const url = `${API_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
   const init: RequestInit = {

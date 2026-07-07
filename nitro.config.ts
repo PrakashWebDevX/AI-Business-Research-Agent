@@ -1,8 +1,7 @@
 import { defineNitroConfig } from "nitro/config";
 
-// Deploy target. Overridable via NITRO_PRESET env var.
-// - Lovable / Cloudflare (default): NITRO_PRESET=cloudflare_module
-// - Netlify: set NITRO_PRESET=netlify (already wired in netlify.toml)
+// Deploy target. This project is configured for TanStack Start SSR on Netlify.
+// Override with NITRO_PRESET only when intentionally building for another host.
 export default defineNitroConfig({
-  preset: process.env.NITRO_PRESET ?? "cloudflare_module",
+  preset: process.env.NITRO_PRESET ?? "netlify",
 });
