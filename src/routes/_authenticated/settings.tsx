@@ -1,86 +1,74 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { motion } from "framer-motion";
-import { Moon, Sun, LogOut, User } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
+import { Settings as SettingsIcon, Trash2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
-import { authService } from "@/services/authService";
+import { API_URL, isApiConfigured } from "@/lib/api";
+import { sessionsService } from "@/services/sessionsService";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/settings")({
-  head: () => ({ meta: [{ title: "Settings · EMS" }] }),
+  head: () => ({ meta: [{ title: "Settings · AI Business Research Agent" }] }),
   component: SettingsPage,
 });
 
 function SettingsPage() {
   const { user } = useAuth();
-  const { theme, setTheme } = useTheme();
-  const navigate = useNavigate();
-
+  const { theme, toggle } = useTheme();
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-8 md:px-8">
-      <h1 className="mb-6 text-2xl font-semibold tracking-tight md:text-3xl">Settings</h1>
-
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="glass rounded-2xl p-6">
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Account</h2>
-        <div className="flex items-center gap-3">
-          <div className="grid h-10 w-10 place-items-center rounded-full bg-primary/15 text-primary">
-            <User className="h-4 w-4" />
-          </div>
-          <div>
-            <div className="text-sm font-medium">{user?.email}</div>
-            <div className="text-xs text-muted-foreground">Signed in via Supabase</div>
-          </div>
-        </div>
-      </motion.div>
-
-      <div className="mt-3 glass rounded-2xl p-6">
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Appearance</h2>
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            onClick={() => setTheme("light")}
-            className={`flex items-center gap-3 rounded-xl border p-4 text-left transition-colors ${
-              theme === "light" ? "border-primary bg-primary/10" : "border-border hover:bg-accent"
-            }`}
-          >
-            <Sun className="h-5 w-5" />
-            <div>
-              <div className="text-sm font-medium">Light</div>
-              <div className="text-xs text-muted-foreground">Clean and bright</div>
-            </div>
-          </button>
-          <button
-            onClick={() => setTheme("dark")}
-            className={`flex items-center gap-3 rounded-xl border p-4 text-left transition-colors ${
-              theme === "dark" ? "border-primary bg-primary/10" : "border-border hover:bg-accent"
-            }`}
-          >
-            <Moon className="h-5 w-5" />
-            <div>
-              <div className="text-sm font-medium">Dark</div>
-              <div className="text-xs text-muted-foreground">Focused and elegant</div>
-            </div>
-          </button>
-        </div>
+    <div className="mx-auto max-w-3xl space-y-6 px-4 py-6 md:px-6">
+      <div className="flex items-center gap-2">
+        <SettingsIcon className="h-5 w-5 text-primary" />
+        <h1 className="text-lg font-semibold">Settings</h1>
       </div>
 
-      <div className="mt-3 glass rounded-2xl p-6">
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Session</h2>
+      <Section title="Account">
+        <Row label="Email" value={user?.email ?? "—"} />
+        <Row label="User ID" value={user?.id ?? "—"} mono />
+      </Section>
+
+      <Section title="Appearance">
+        <div className="flex items-center justify-between">
+          <div className="text-sm">Theme: <span className="font-medium capitalize">{theme}</span></div>
+          <Button size="sm" variant="outline" onClick={toggle}>Toggle</Button>
+        </div>
+      </Section>
+
+      <Section title="Backend">
+        <Row label="VITE_API_URL" value={isApiConfigured ? API_URL : "Not configured"} mono />
+      </Section>
+
+      <Section title="Data">
         <Button
-          variant="destructive"
+          variant="outline"
           onClick={async () => {
-            try {
-              await authService.signOut();
-              toast.success("Signed out");
-              navigate({ to: "/auth" });
-            } catch (e) {
-              toast.error("Sign out failed", { description: (e as Error).message });
-            }
+            const all = await sessionsService.list();
+            await Promise.all(all.map((s) => sessionsService.remove(s.id)));
+            toast.success("Chat history cleared");
           }}
         >
-          <LogOut className="mr-2 h-4 w-4" /> Sign out
+          <Trash2 className="mr-2 h-4 w-4" /> Clear chat history
         </Button>
-      </div>
+      </Section>
+
+    </div>
+  );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded-2xl border border-border bg-card/60 p-5 backdrop-blur">
+      <h2 className="mb-3 font-semibold">{title}</h2>
+      <div className="space-y-3">{children}</div>
+    </div>
+  );
+}
+
+function Row({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+  return (
+    <div className="flex items-center justify-between gap-3 text-sm">
+      <span className="text-muted-foreground">{label}</span>
+      <span className={"truncate " + (mono ? "font-mono text-xs" : "")}>{value}</span>
     </div>
   );
 }

@@ -3,14 +3,20 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
-  Users,
+  MessageSquare,
+  Database,
+  Globe,
+  BarChart3,
+  Bookmark,
+  Download,
   Settings,
+  HelpCircle,
   LogOut,
   Menu,
   Moon,
   Sun,
   X,
-  Search,
+  Sparkles,
   Loader2,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -35,9 +41,15 @@ export const Route = createFileRoute("/_authenticated")({
 
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/employees", label: "Employees", icon: Users },
+  { to: "/chat", label: "AI Chat", icon: MessageSquare },
+  { to: "/sql", label: "SQL Agent", icon: Database },
+  { to: "/research", label: "Web Research", icon: Globe },
+  { to: "/analytics", label: "Analytics", icon: BarChart3 },
+  { to: "/saved", label: "Saved Reports", icon: Bookmark },
+  { to: "/exports", label: "Exports", icon: Download },
   { to: "/settings", label: "Settings", icon: Settings },
-];
+  { to: "/help", label: "Help", icon: HelpCircle },
+] as const;
 
 function AuthedLayout() {
   const { user, loading } = useAuth();
@@ -119,15 +131,15 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
     <div className="flex h-full flex-col p-4">
       <Link to="/dashboard" className="mb-6 flex items-center gap-3" onClick={onNavigate}>
         <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-primary to-primary-glow text-primary-foreground shadow-lg">
-          <Users className="h-5 w-5" />
+          <Sparkles className="h-5 w-5" />
         </div>
         <div>
-          <div className="text-sm font-semibold tracking-tight">EMS</div>
-          <div className="text-[11px] text-muted-foreground">Employee suite</div>
+          <div className="text-sm font-semibold tracking-tight">AI Research</div>
+          <div className="text-[11px] text-muted-foreground">Business intelligence agent</div>
         </div>
       </Link>
 
-      <nav className="flex-1 space-y-1">
+      <nav className="flex-1 space-y-1 overflow-y-auto">
         {NAV.map((n) => {
           const active = pathname === n.to || pathname.startsWith(n.to + "/");
           const Icon = n.icon;
@@ -145,21 +157,10 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
             >
               <Icon className="h-4 w-4" />
               <span>{n.label}</span>
-              {active && (
-                <motion.span
-                  layoutId="nav-active"
-                  className="ml-auto h-1.5 w-1.5 rounded-full bg-primary"
-                />
-              )}
             </Link>
           );
         })}
       </nav>
-
-      <div className="mt-4 rounded-xl border border-border bg-card/60 p-3 text-xs text-muted-foreground">
-        <div className="font-medium text-foreground">Need help?</div>
-        <div className="mt-0.5">Check the README for setup and deployment.</div>
-      </div>
     </div>
   );
 }
@@ -174,19 +175,6 @@ function TopBar({ onMenu }: { onMenu: () => void }) {
       <Button size="icon" variant="ghost" className="md:hidden" onClick={onMenu}>
         <Menu className="h-5 w-5" />
       </Button>
-      <div className="relative hidden max-w-md flex-1 md:block">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <input
-          placeholder="Search employees, departments…"
-          className="h-9 w-full rounded-lg border border-input bg-background pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-ring"
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              const v = (e.target as HTMLInputElement).value.trim();
-              navigate({ to: "/employees", search: { q: v || undefined } as never });
-            }
-          }}
-        />
-      </div>
       <div className="ml-auto flex items-center gap-2">
         <Button size="icon" variant="ghost" onClick={toggle} aria-label="Toggle theme">
           {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}

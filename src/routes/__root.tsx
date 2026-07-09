@@ -74,16 +74,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Employee Management System" },
+      { title: "AI Business Research Agent" },
       {
         name: "description",
         content:
-          "Modern employee management platform — manage your workforce with beautiful dashboards, analytics, and secure Supabase-powered auth.",
+          "AI-powered business research agent — chat, SQL, and web research with a FastAPI backend and Supabase auth.",
       },
-      { property: "og:title", content: "Employee Management System" },
-      { property: "og:description", content: "Manage your workforce with a modern SaaS dashboard." },
+      { property: "og:title", content: "AI Business Research Agent" },
+      { property: "og:description", content: "Chat, query, and research with AI." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },

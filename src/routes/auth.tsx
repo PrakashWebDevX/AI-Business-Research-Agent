@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Loader2, Mail, Lock, ArrowRight, Users } from "lucide-react";
 import { authService } from "@/services/authService";
-import { loginSchema, signupSchema, forgotSchema } from "@/schemas/employee";
+import { loginSchema, signupSchema, forgotSchema } from "@/schemas/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
