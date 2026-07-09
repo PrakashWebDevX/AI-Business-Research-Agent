@@ -3,42 +3,69 @@ import { api } from "@/lib/api";
 export interface ChatMessage {
   role: "user" | "assistant" | "system";
   content: string;
-  createdAt?: string;
+  created_at?: string;
 }
 
 export interface ChatResponse {
+  session_id?: string;
+
+  message?: ChatMessage;
+
   reply?: string;
-  message?: string;
   content?: string;
   answer?: string;
   output?: string;
-  data?: unknown;
+  summary?: string;
+
   tool?: string;
   agent?: string;
-  sources?: Array<{ title?: string; url?: string; snippet?: string }>;
+  result?: unknown;
+  data?: unknown;
+
+  sources?: Array<{
+    title?: string;
+    url?: string;
+    snippet?: string;
+  }>;
+
+  findings?: Array<{
+    title: string;
+    url?: string;
+    snippet?: string;
+  }>;
+
   columns?: string[];
   rows?: unknown[][];
-  result?: unknown;
-  findings?: Array<{ title: string; url?: string; snippet?: string }>;
-  summary?: string;
 }
 
 /**
- * All prompts (chat, SQL-style, research-style) go through the single
- * FastAPI endpoint POST /api/chat. The backend BusinessAgent routes to
- * the correct tool (SQL or Web Search) automatically.
+ * Every request goes through POST /api/chat.
+ * The FastAPI BusinessAgent automatically decides whether to use:
+ * - Chat
+ * - SQL
+ * - Web Search
  */
-async function send(prompt: string, sessionId?: string): Promise<ChatResponse> {
-  return api<ChatResponse>("/api/chat", {
-    method: "POST",
-    body: { message: prompt, session_id: sessionId },
-  });
+async function send(
+  prompt: string,
+  sessionId?: string,
+): Promise<ChatResponse> {
+  return api.post<ChatResponse>(
+    "/api/chat",
+    {
+      message: prompt,
+      session_id: sessionId,
+    },
+    {
+      retries: 0,
+    },
+  );
 }
 
 export const chatService = {
   send,
-  // Back-compat aliases — all route to the same /api/chat endpoint.
+
+  // aliases
   ask: send,
-  sql: (query: string, sessionId?: string) => send(query, sessionId),
-  research: (topic: string, sessionId?: string) => send(topic, sessionId),
+  sql: send,
+  research: send,
 };

@@ -38,6 +38,9 @@ function ChatPage() {
         r.message?.content ??
         r.reply ??
         r.content ??
+        r.answer ??
+        r.output ??
+        r.summary ??
         (typeof r.data === "string"
           ? r.data
           : JSON.stringify(r.data ?? r, null, 2));

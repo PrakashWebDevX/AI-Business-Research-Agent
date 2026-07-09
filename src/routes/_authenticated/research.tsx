@@ -30,8 +30,15 @@ function ResearchPage() {
     try {
       const r = await chatService.send(prompt);
       const text =
-        r.reply || r.message || r.content || r.answer || r.output || r.summary ||
-        (typeof r.data === "string" ? r.data : JSON.stringify(r.data ?? r, null, 2));
+        r.message?.content ??
+        r.reply ??
+        r.content ??
+        r.answer ??
+        r.output ??
+        r.summary ??
+        (typeof r.data === "string"
+          ? r.data
+          : JSON.stringify(r.data ?? r, null, 2));
       setReply(String(text));
     } catch (e) {
       toast.error("Research failed", { description: (e as Error).message });
