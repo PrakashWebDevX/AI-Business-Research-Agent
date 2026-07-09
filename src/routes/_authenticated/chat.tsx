@@ -31,23 +31,50 @@ function ChatPage() {
     const now = new Date().toISOString();
     setMessages((m) => [...m, { role: "user", content: q, createdAt: now }]);
     setLoading(true);
-    try {
-      const r = await chatService.ask(q, sessionId.current);
 
-      const reply = r.message.content;
+    try {
+      console.log("[chat] sending:", q, "sessionId:", sessionId.current);
+      const r = await chatService.ask(q, sessionId.current);
+      console.log("[chat] raw response:", r);
+
+      if (r?.session_id) {
+        sessionId.current = r.session_id as ReturnType<typeof crypto.randomUUID>;
+      }
+
+      const reply = r?.message?.content ?? "";
+      if (!reply) {
+        console.warn("[chat] response had no message.content:", r);
+      }
+
       const at = new Date().toISOString();
+      const assistantMsg: Msg = { role: "assistant", content: String(reply), createdAt: at };
+
+      // Update UI state FIRST, unconditionally. Nothing after this point
+      // can prevent the assistant message from rendering.
+      let finalMessages: Msg[] = [];
       setMessages((m) => {
-        const next = [...m, { role: "assistant" as const, content: String(reply), createdAt: at }];
+        finalMessages = [...m, assistantMsg];
+        return finalMessages;
+      });
+
+      // Side-effect (saving to session history) is now fully isolated.
+      // If this throws, it will NEVER show as "Chat failed" and will
+      // NEVER prevent the assistant reply from appearing.
+      try {
         sessionsService.save({
           id: sessionId.current,
-          title: next[0]?.content.slice(0, 60) || "Chat",
+          title: finalMessages[0]?.content.slice(0, 60) || "Chat",
           createdAt: now,
-          messages: next,
+          messages: finalMessages,
         });
-        return next;
-      });
+      } catch (saveErr) {
+        console.error("[chat] sessionsService.save failed (non-fatal):", saveErr);
+      }
     } catch (e) {
-      toast.error("Chat failed", { description: (e as Error).message });
+      // This now ONLY fires for a genuine chatService.ask() failure —
+      // e.g. network error, CORS block, or non-2xx response.
+      console.error("[chat] chatService.ask failed — full error:", e);
+      toast.error((e as Error)?.message || "Chat failed");
     } finally {
       setLoading(false);
     }

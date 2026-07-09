@@ -29,10 +29,11 @@ function ResearchPage() {
     setLoading(true);
     try {
       const r = await chatService.send(prompt);
-      const text = r.message.content;
+      const text = r.message?.content ?? "";
       setReply(String(text));
     } catch (e) {
-      toast.error("Research failed", { description: (e as Error).message });
+      console.error("Research failed:", e);
+      toast.error((e as Error).message || "Research failed");
     } finally {
       setLoading(false);
     }

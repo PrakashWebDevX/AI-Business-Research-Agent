@@ -32,24 +32,24 @@ function SqlPage() {
       const r = await chatService.send(prompt);
       setResult(r);
     } catch (e) {
-      toast.error("Query failed", { description: (e as Error).message });
+      console.error("SQL query failed:", e);
+      toast.error((e as Error).message || "Query failed");
     } finally {
       setLoading(false);
     }
   }
 
-  const rows = result?.rows ?? [];
-  const cols =
-    result?.columns ??
-    (rows[0] && Array.isArray(rows[0]) ? rows[0].map((_, i) => `col_${i}`) : []);
-  const replyText =
-    result &&
-    (result.reply ||
-      result.message ||
-      result.content ||
-      result.answer ||
-      result.output ||
-      (typeof result.data === "string" ? result.data : ""));
+  const tableData = (result?.message?.table_data ?? null) as
+    | { columns?: string[]; rows?: unknown[][] }
+    | unknown[][]
+    | null;
+  const rows: unknown[][] = Array.isArray(tableData)
+    ? (tableData as unknown[][])
+    : (tableData?.rows ?? []);
+  const cols: string[] = Array.isArray(tableData)
+    ? (rows[0] && Array.isArray(rows[0]) ? (rows[0] as unknown[]).map((_v, i) => `col_${i}`) : [])
+    : (tableData?.columns ?? []);
+  const replyText = result?.message?.content ?? "";
 
   return (
     <div className="mx-auto max-w-6xl space-y-4 px-4 py-6 md:px-6">
