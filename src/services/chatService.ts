@@ -7,37 +7,20 @@ export interface ChatMessage {
 }
 
 export interface ChatResponse {
-  session_id?: string;
-
-  message?: ChatMessage;
-
-  reply?: string;
-  content?: string;
-  answer?: string;
-  output?: string;
-  summary?: string;
-
-  tool?: string;
-  agent?: string;
-  result?: unknown;
-  data?: unknown;
-
-  sources?: Array<{
-    title?: string;
-    url?: string;
-    snippet?: string;
-  }>;
-
-  findings?: Array<{
-    title: string;
-    url?: string;
-    snippet?: string;
-  }>;
-
-  columns?: string[];
-  rows?: unknown[][];
+  session_id: string;
+  message: {
+    id: string;
+    role: string;
+    content: string;
+    tool_used?: string;
+    execution_time_seconds?: number;
+    generated_sql?: string | null;
+    table_data?: unknown;
+    sources?: unknown;
+    chart?: unknown;
+    created_at?: string;
+  };
 }
-
 /**
  * Every request goes through POST /api/chat.
  * The FastAPI BusinessAgent automatically decides whether to use:

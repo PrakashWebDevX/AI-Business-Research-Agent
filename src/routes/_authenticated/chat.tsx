@@ -34,16 +34,7 @@ function ChatPage() {
     try {
       const r = await chatService.ask(q, sessionId.current);
 
-      const reply =
-        r.message?.content ??
-        r.reply ??
-        r.content ??
-        r.answer ??
-        r.output ??
-        r.summary ??
-        (typeof r.data === "string"
-          ? r.data
-          : JSON.stringify(r.data ?? r, null, 2));
+      const reply = r.message.content;
       const at = new Date().toISOString();
       setMessages((m) => {
         const next = [...m, { role: "assistant" as const, content: String(reply), createdAt: at }];
