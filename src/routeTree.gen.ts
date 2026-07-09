@@ -22,6 +22,10 @@ import { Route as AuthenticatedExportsRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/chat'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
+import { Route as AuthenticatedEmployeesIndexRouteImport } from './routes/_authenticated/employees/index'
+import { Route as AuthenticatedEmployeesNewRouteImport } from './routes/_authenticated/employees/new'
+import { Route as AuthenticatedEmployeesIdRouteImport } from './routes/_authenticated/employees/$id'
+import { Route as AuthenticatedEmployeesIdEditRouteImport } from './routes/_authenticated/employees/$id.edit'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -87,6 +91,30 @@ const AuthenticatedAnalyticsRoute = AuthenticatedAnalyticsRouteImport.update({
   path: '/analytics',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedEmployeesIndexRoute =
+  AuthenticatedEmployeesIndexRouteImport.update({
+    id: '/employees/',
+    path: '/employees/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedEmployeesNewRoute =
+  AuthenticatedEmployeesNewRouteImport.update({
+    id: '/employees/new',
+    path: '/employees/new',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedEmployeesIdRoute =
+  AuthenticatedEmployeesIdRouteImport.update({
+    id: '/employees/$id',
+    path: '/employees/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedEmployeesIdEditRoute =
+  AuthenticatedEmployeesIdEditRouteImport.update({
+    id: '/edit',
+    path: '/edit',
+    getParentRoute: () => AuthenticatedEmployeesIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -101,6 +129,10 @@ export interface FileRoutesByFullPath {
   '/saved': typeof AuthenticatedSavedRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/sql': typeof AuthenticatedSqlRoute
+  '/employees/$id': typeof AuthenticatedEmployeesIdRouteWithChildren
+  '/employees/new': typeof AuthenticatedEmployeesNewRoute
+  '/employees/': typeof AuthenticatedEmployeesIndexRoute
+  '/employees/$id/edit': typeof AuthenticatedEmployeesIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -115,6 +147,10 @@ export interface FileRoutesByTo {
   '/saved': typeof AuthenticatedSavedRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/sql': typeof AuthenticatedSqlRoute
+  '/employees/$id': typeof AuthenticatedEmployeesIdRouteWithChildren
+  '/employees/new': typeof AuthenticatedEmployeesNewRoute
+  '/employees': typeof AuthenticatedEmployeesIndexRoute
+  '/employees/$id/edit': typeof AuthenticatedEmployeesIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -131,6 +167,10 @@ export interface FileRoutesById {
   '/_authenticated/saved': typeof AuthenticatedSavedRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/sql': typeof AuthenticatedSqlRoute
+  '/_authenticated/employees/$id': typeof AuthenticatedEmployeesIdRouteWithChildren
+  '/_authenticated/employees/new': typeof AuthenticatedEmployeesNewRoute
+  '/_authenticated/employees/': typeof AuthenticatedEmployeesIndexRoute
+  '/_authenticated/employees/$id/edit': typeof AuthenticatedEmployeesIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -147,6 +187,10 @@ export interface FileRouteTypes {
     | '/saved'
     | '/settings'
     | '/sql'
+    | '/employees/$id'
+    | '/employees/new'
+    | '/employees/'
+    | '/employees/$id/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -161,6 +205,10 @@ export interface FileRouteTypes {
     | '/saved'
     | '/settings'
     | '/sql'
+    | '/employees/$id'
+    | '/employees/new'
+    | '/employees'
+    | '/employees/$id/edit'
   id:
     | '__root__'
     | '/'
@@ -176,6 +224,10 @@ export interface FileRouteTypes {
     | '/_authenticated/saved'
     | '/_authenticated/settings'
     | '/_authenticated/sql'
+    | '/_authenticated/employees/$id'
+    | '/_authenticated/employees/new'
+    | '/_authenticated/employees/'
+    | '/_authenticated/employees/$id/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -278,8 +330,50 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAnalyticsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/employees/': {
+      id: '/_authenticated/employees/'
+      path: '/employees'
+      fullPath: '/employees/'
+      preLoaderRoute: typeof AuthenticatedEmployeesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/employees/new': {
+      id: '/_authenticated/employees/new'
+      path: '/employees/new'
+      fullPath: '/employees/new'
+      preLoaderRoute: typeof AuthenticatedEmployeesNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/employees/$id': {
+      id: '/_authenticated/employees/$id'
+      path: '/employees/$id'
+      fullPath: '/employees/$id'
+      preLoaderRoute: typeof AuthenticatedEmployeesIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/employees/$id/edit': {
+      id: '/_authenticated/employees/$id/edit'
+      path: '/edit'
+      fullPath: '/employees/$id/edit'
+      preLoaderRoute: typeof AuthenticatedEmployeesIdEditRouteImport
+      parentRoute: typeof AuthenticatedEmployeesIdRoute
+    }
   }
 }
+
+interface AuthenticatedEmployeesIdRouteChildren {
+  AuthenticatedEmployeesIdEditRoute: typeof AuthenticatedEmployeesIdEditRoute
+}
+
+const AuthenticatedEmployeesIdRouteChildren: AuthenticatedEmployeesIdRouteChildren =
+  {
+    AuthenticatedEmployeesIdEditRoute: AuthenticatedEmployeesIdEditRoute,
+  }
+
+const AuthenticatedEmployeesIdRouteWithChildren =
+  AuthenticatedEmployeesIdRoute._addFileChildren(
+    AuthenticatedEmployeesIdRouteChildren,
+  )
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
@@ -291,6 +385,9 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSavedRoute: typeof AuthenticatedSavedRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSqlRoute: typeof AuthenticatedSqlRoute
+  AuthenticatedEmployeesIdRoute: typeof AuthenticatedEmployeesIdRouteWithChildren
+  AuthenticatedEmployeesNewRoute: typeof AuthenticatedEmployeesNewRoute
+  AuthenticatedEmployeesIndexRoute: typeof AuthenticatedEmployeesIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -303,6 +400,9 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSavedRoute: AuthenticatedSavedRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSqlRoute: AuthenticatedSqlRoute,
+  AuthenticatedEmployeesIdRoute: AuthenticatedEmployeesIdRouteWithChildren,
+  AuthenticatedEmployeesNewRoute: AuthenticatedEmployeesNewRoute,
+  AuthenticatedEmployeesIndexRoute: AuthenticatedEmployeesIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -317,3 +417,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
