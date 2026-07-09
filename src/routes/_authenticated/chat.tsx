@@ -33,7 +33,14 @@ function ChatPage() {
     setLoading(true);
     try {
       const r = await chatService.ask(q, sessionId.current);
-      const reply = r.reply || r.message || r.content || (typeof r.data === "string" ? r.data : JSON.stringify(r.data ?? r, null, 2));
+
+      const reply =
+        r.message?.content ??
+        r.reply ??
+        r.content ??
+        (typeof r.data === "string"
+          ? r.data
+          : JSON.stringify(r.data ?? r, null, 2));
       const at = new Date().toISOString();
       setMessages((m) => {
         const next = [...m, { role: "assistant" as const, content: String(reply), createdAt: at }];
