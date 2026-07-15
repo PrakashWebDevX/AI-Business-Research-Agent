@@ -33,6 +33,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { KnowledgeBase } from "@/components/layout/KnowledgeBase";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -151,15 +152,16 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
               className={cn(
                 "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
                 active
-                  ? "bg-primary/15 text-primary"
+                  ? "bg-[#3B82F6]/15 text-[#3B82F6]"
                   : "text-muted-foreground hover:bg-accent hover:text-foreground",
               )}
             >
-              <Icon className="h-4 w-4" />
+              <Icon className={cn("h-4 w-4", active && "text-[#3B82F6]")} />
               <span>{n.label}</span>
             </Link>
           );
         })}
+        <KnowledgeBase />
       </nav>
     </div>
   );

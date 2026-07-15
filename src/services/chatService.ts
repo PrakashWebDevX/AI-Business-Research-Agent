@@ -32,6 +32,14 @@ async function send(prompt: string, sessionId?: string): Promise<ChatResponse> {
       method: "POST",
       body: { message: prompt, session_id: sessionId },
     });
+    console.log("API Response:", res);
+    if (res?.message) {
+      console.log("[chat] tool_used:", res.message.tool_used);
+      if (res.message.generated_sql) console.log("[chat] generated_sql:", res.message.generated_sql);
+      if (res.message.table_data) console.log("[chat] table_data:", res.message.table_data);
+      if (res.message.sources) console.log("[chat] sources:", res.message.sources);
+      if (res.message.chart) console.log("[chat] chart:", res.message.chart);
+    }
     if (!res || !res.message || typeof res.message.content === "undefined") {
       console.error("Invalid /api/chat response shape:", res);
       throw new Error("Invalid response from backend: missing message.content");

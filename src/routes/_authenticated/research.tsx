@@ -1,10 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Globe, Loader2, Search, Bookmark } from "lucide-react";
-import { chatService } from "@/services/chatService";
+import { chatService, type ChatResponse } from "@/services/chatService";
 import { savedService } from "@/services/sessionsService";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { MessageBubble } from "@/components/chat/MessageBubble";
+import { TypingDots } from "@/components/chat/TypingDots";
 
 export const Route = createFileRoute("/_authenticated/research")({
   head: () => ({ meta: [{ title: "Web Research · AI Business Research Agent" }] }),
@@ -20,7 +22,7 @@ const SUGGESTIONS = [
 function ResearchPage() {
   const [topic, setTopic] = useState("");
   const [loading, setLoading] = useState(false);
-  const [reply, setReply] = useState<string>("");
+  const [result, setResult] = useState<ChatResponse | null>(null);
 
   async function run(q?: string) {
     const prompt = (q ?? topic).trim();
@@ -29,11 +31,10 @@ function ResearchPage() {
     setLoading(true);
     try {
       const r = await chatService.send(prompt);
-      const text = r.message?.content ?? "";
-      setReply(String(text));
+      setResult(r);
     } catch (e) {
       console.error("Research failed:", e);
-      toast.error((e as Error).message || "Research failed");
+      toast.error("Research failed", { description: (e as Error).message || "Unknown error" });
     } finally {
       setLoading(false);
     }
@@ -42,8 +43,8 @@ function ResearchPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-4 px-4 py-6 md:px-6">
       <div className="flex items-center gap-2">
-        <Globe className="h-5 w-5 text-primary" />
-        <h1 className="text-lg font-semibold">Web Research Agent</h1>
+        <Globe className="h-5 w-5 text-[#3B82F6]" />
+        <h1 className="text-lg font-semibold tracking-tight">Web Research Agent</h1>
       </div>
 
       <div className="flex gap-2">
@@ -54,21 +55,25 @@ function ResearchPage() {
             onChange={(e) => setTopic(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && run()}
             placeholder="Topic, company, market, trend…"
-            className="h-11 w-full rounded-xl border border-input bg-background pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-ring"
+            className="h-11 w-full rounded-xl border border-input bg-background pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-[#3B82F6]"
           />
         </div>
-        <Button onClick={() => run()} disabled={loading || !topic.trim()} className="h-11">
+        <Button
+          onClick={() => run()}
+          disabled={loading || !topic.trim()}
+          className="h-11 bg-[#3B82F6] hover:bg-[#3B82F6]/90"
+        >
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Research"}
         </Button>
       </div>
 
-      {!reply && !loading && (
+      {!result && !loading && (
         <div className="flex flex-wrap gap-2">
           {SUGGESTIONS.map((s) => (
             <button
               key={s}
               onClick={() => run(s)}
-              className="rounded-full border border-border bg-card/60 px-3 py-1.5 text-xs text-muted-foreground hover:border-primary/50 hover:text-foreground"
+              className="rounded-full border border-border bg-[#1E293B] px-3 py-1.5 text-xs text-muted-foreground hover:border-[#3B82F6]/50 hover:text-foreground"
             >
               {s}
             </button>
@@ -76,10 +81,11 @@ function ResearchPage() {
         </div>
       )}
 
-      {reply && (
-        <div className="rounded-2xl border border-border bg-card/60 p-5 backdrop-blur">
-          <div className="mb-2 flex items-center justify-between">
-            <h2 className="font-semibold">Result</h2>
+      {loading && <TypingDots label="Researching" />}
+
+      {result && (
+        <div className="space-y-3">
+          <div className="flex justify-end">
             <Button
               size="sm"
               variant="outline"
@@ -89,7 +95,7 @@ function ResearchPage() {
                   title: topic,
                   kind: "research",
                   createdAt: new Date().toISOString(),
-                  payload: { topic, reply },
+                  payload: { topic, result },
                 });
                 toast.success("Saved");
               }}
@@ -97,7 +103,11 @@ function ResearchPage() {
               <Bookmark className="mr-2 h-4 w-4" /> Save
             </Button>
           </div>
-          <p className="whitespace-pre-wrap text-sm text-muted-foreground">{reply}</p>
+          <MessageBubble
+            role="assistant"
+            content={result.message?.content ?? ""}
+            message={result.message}
+          />
         </div>
       )}
     </div>
